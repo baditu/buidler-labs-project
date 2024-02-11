@@ -5,12 +5,14 @@ import { TESTNET_BASEURL, WHITELIST_CONTRACT_ID } from "../constants";
 import { Button, Spinner } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
 
-interface IButtonFetchEventrsProps {
+interface IButtonFetchEventsProps {
   inputAddress: string;
+  isConnected: boolean;
 }
 
-const ButtonFetchEvents: React.FC<IButtonFetchEventrsProps> = ({
+const ButtonFetchEvents: React.FC<IButtonFetchEventsProps> = ({
   inputAddress,
+  isConnected,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const toast = useToast();
@@ -66,8 +68,10 @@ const ButtonFetchEvents: React.FC<IButtonFetchEventrsProps> = ({
   return (
     <Button
       variant={"primary"}
+      maxW={"50%"}
+      minW={"150px"}
       onClick={handleClick}
-      isDisabled={inputAddress === ""}
+      isDisabled={inputAddress === "" && !isConnected}
     >
       {loading ? <Spinner /> : "Check Account"}
     </Button>

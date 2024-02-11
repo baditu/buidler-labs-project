@@ -1,29 +1,19 @@
-import {
-  Box,
-  Button,
-  FormErrorMessage,
-  HStack,
-  Heading,
-  Input,
-} from "@chakra-ui/react";
+import { Box, Flex, FormErrorMessage, Heading, Input } from "@chakra-ui/react";
 import { FormControl, FormLabel } from "@chakra-ui/react";
-import {
-  ContractExecuteTransaction,
-  ContractFunctionParameters,
-  Signer,
-} from "@hashgraph/sdk";
 import { ChangeEvent, useState } from "react";
-import { WHITELIST_CONTRACT_ID } from "../constants";
-import { useWallet } from "@buidlerlabs/hashgraph-react-wallets";
-import { HashpackConnector } from "@buidlerlabs/hashgraph-react-wallets/connectors";
 import ButtonFetchEvents from "../components/ButtonFetchEventrs";
 import ButtonGetMessage from "../components/ButtonGetMessage";
+import ButtonWhitelist from "../components/ButtonWhitelist";
+import { useAccountId } from "@buidlerlabs/hashgraph-react-wallets";
+import { HashpackConnector } from "@buidlerlabs/hashgraph-react-wallets/connectors";
+import { useMediaQuery } from "@chakra-ui/react";
 
 const Home = () => {
   const [address, setAddress] = useState<string>("");
   const [isAddressInvalid, setIsAddressInvalid] = useState<boolean>(false);
+  const { accountId } = useAccountId(HashpackConnector);
 
-  const { signer } = useWallet(HashpackConnector);
+  const [isForBigDevices] = useMediaQuery("(min-width: 670px)");
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setAddress(event.target.value);
@@ -40,29 +30,6 @@ const Home = () => {
     }
   };
 
-  const handleWhitelist = async () => {
-    try {
-      const tx = await new ContractExecuteTransaction()
-        .setContractId(WHITELIST_CONTRACT_ID)
-        .setGas(100_100)
-        .setFunction(
-          "whitelist",
-          new ContractFunctionParameters().addAddress(address)
-        )
-        .freezeWithSigner(signer as Signer);
-
-      const txResponse = await tx.executeWithSigner(signer as Signer);
-
-      const txReceipt = await txResponse.getReceiptWithSigner(signer as Signer);
-
-      const transactionStatus = txReceipt.status;
-
-      console.log(transactionStatus);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   return (
     <Box
       display={"flex"}
@@ -72,32 +39,58 @@ const Home = () => {
       w={"100%"}
       h={"88vh"}
     >
-      <Heading as="h1" color={"#12372A"} pb={"2rem"}>
+      <Heading
+        fontSize={isForBigDevices ? "32px" : "18px"}
+        textAlign={"center"}
+        as="h1"
+        color={"#12372A"}
+        pb={"2rem"}
+      >
         Interaction With Whitelist Contract
       </Heading>
       <FormControl
-        maxW={"50%"}
+        maxWidth={"500px"}
         isRequired
         isInvalid={isAddressInvalid}
         onBlur={handleBlur}
+        style={{ margin: "0 auto" }}
       >
-        <FormLabel color={"#12372A"}>Account Address</FormLabel>
+        <FormLabel
+          fontSize={isForBigDevices ? "16px" : "12px"}
+          color={"#12372A"}
+          whiteSpace={"nowrap"}
+        >
+          Account Address
+        </FormLabel>
         <Input
           border={"2px solid #12372A"}
           bg={"#ADBC9F"}
           _focus={{ borderColor: "#ADBC9F", boxShadow: "0 0 0 2px #ADBC9F" }}
           type="text"
           onChange={handleChange}
+          minW={"150px"}
+          maxW={"500px"}
         />
         <FormErrorMessage color={"#FF5252"}>Required</FormErrorMessage>
       </FormControl>
-      <HStack spacing={"2rem"} py={"2rem"}>
-        <Button variant={"primary"} onClick={handleWhitelist}>
-          Whitelist an account
-        </Button>
-        <ButtonFetchEvents inputAddress={address} />
-        <ButtonGetMessage />
-      </HStack>
+      <Flex
+        w={"100%"}
+        maxW={"1200px"}
+        h={"50%"}
+        flexDirection={isForBigDevices ? "row" : "column"}
+        justifyContent={"space-evenly"}
+        alignItems={"center"}
+      >
+        <ButtonWhitelist
+          inputAddress={address}
+          isConnected={accountId !== undefined}
+        />
+        <ButtonFetchEvents
+          inputAddress={address}
+          isConnected={accountId !== undefined}
+        />
+        <ButtonGetMessage isConnected={accountId !== undefined} />
+      </Flex>
     </Box>
   );
 };

@@ -7,10 +7,16 @@ import {
   WHITELIST_CONTRACT_ID,
 } from "../constants";
 import { Button, Spinner } from "@chakra-ui/react";
-import { hexToString } from "../lib/hexToString";
 import { useToast } from "@chakra-ui/react";
+import { ethers } from "ethers";
 
-const ButtonGetMessage = () => {
+interface IButtonGetMessageProps {
+  isConnected: boolean;
+}
+
+const ButtonGetMessage: React.FC<IButtonGetMessageProps> = ({
+  isConnected,
+}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const toast = useToast();
 
@@ -26,8 +32,9 @@ const ButtonGetMessage = () => {
         }
       );
 
-      const hexMessage = response.data.state[0].value;
-      const stringMessage = hexToString(hexMessage.substr(2));
+      const hexMessage = response.data.state[0].value.slice(0, 26);
+
+      const stringMessage = ethers.toUtf8String(hexMessage);
 
       toast({
         title: stringMessage,
@@ -54,7 +61,13 @@ const ButtonGetMessage = () => {
   };
 
   return (
-    <Button variant={"primary"} onClick={handleClick}>
+    <Button
+      maxW={"50%"}
+      variant={"primary"}
+      onClick={handleClick}
+      isDisabled={!isConnected}
+      minW={"150px"}
+    >
       {loading ? <Spinner /> : "Show Message"}
     </Button>
   );
