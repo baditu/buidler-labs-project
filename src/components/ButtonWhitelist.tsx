@@ -37,7 +37,9 @@ const ButtonWhitelist: React.FC<IButtonWhitelistProps> = ({
 
       const txResponse = await tx.executeWithSigner(signer as Signer);
 
-      const txReceipt = await txResponse.getReceiptWithSigner(signer as Signer);
+      const txReceipt = await signer
+        ?.getProvider()
+        .getTransactionReceipt(txResponse.transactionId);
 
       const transactionStatus = txReceipt.status;
 
